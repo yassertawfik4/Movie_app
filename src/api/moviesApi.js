@@ -21,4 +21,7 @@ export const getRecommendations =async(id)=>
 export const getMovieVideos =async(id)=>
     handleRequest(axiosMovieInstance.get(`/movie/${id}/videos`))
 
+export const getMovieCredits =async(id)=>
+    handleRequest(axiosMovieInstance.get(`/movie/${id}/credits`))
+
 
