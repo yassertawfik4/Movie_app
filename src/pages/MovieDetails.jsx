@@ -45,7 +45,7 @@ const MovieDetails = () => {
     const recs = data?.[1]?.results || [];
     const { inWishlist, toggleWishlist } = useWishlist(movie);
 
-    // Scroll to top when navigating between movies.
+    // Scroll to top when navigating between movie.
     useEffect(() => {
         window.scrollTo({ top: 0 });
     }, [id]);
@@ -369,4 +369,3 @@ const MovieDetails = () => {
 };
 
 export default MovieDetails;
-
