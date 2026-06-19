@@ -1,53 +1,82 @@
 import { create } from "zustand";
-import {
-  login as loginApi,
-  register as registerApi,
-  logout as logoutApi,
-  getCurrentUser,
-} from "@/api/authApi";
+import { supabase } from "../lib/supabaseClient";
+
+export const userDisplayName = (user) =>
+    user?.user_metadata?.username ||
+    user?.email?.split("@")[0] ||
+    "Your Account";
+
+export const userInitials = (user) => {
+    const base = user?.user_metadata?.username || user?.email || "U";
+    return base.slice(0, 2).toUpperCase();
+};
 
 export const useAuthStore = create((set) => ({
-  // State — isLoggedIn is seeded from a persisted token so a refresh keeps the session
-  user: null,
-  isLoggedIn: !!localStorage.getItem("token"),
+    user: null,
+    session: null,
+    isLoggedIn: false,
+    initialized: false,
 
-  // Log in, then try to load the current user profile
-  login: async (email, password) => {
-    const data = await loginApi(email, password);
-    try {
-      const user = await getCurrentUser();
-      set({ user, isLoggedIn: true });
-    } catch {
-      // Token was stored by loginApi even if /me isn't available
-      set({ isLoggedIn: !!localStorage.getItem("token") });
-    }
-    return data;
-  },
+ 
+    init: () => {
+        const {
+            data: { subscription },
+        } = supabase.auth.onAuthStateChange((_event, session) => {
+            set({
+                session,
+                user: session?.user ?? null,
+                isLoggedIn: !!session,
+            });
+        });
 
-  // Register a new account (auto-logs-in if the API returns a token)
-  register: async (firstName, email, password) => {
-    const data = await registerApi(firstName, email, password);
-    if (localStorage.getItem("token")) {
-      set({ isLoggedIn: true });
-    }
-    return data;
-  },
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            set({
+                session,
+                user: session?.user ?? null,
+                isLoggedIn: !!session,
+                initialized: true,
+            });
+        });
 
-  // Clear the session
-  logout: () => {
-    logoutApi();
-    set({ user: null, isLoggedIn: false });
-  },
+        return () => subscription.unsubscribe();
+    },
 
-  // Re-hydrate the user from the token (e.g. on app start)
-  fetchUser: async () => {
-    try {
-      const user = await getCurrentUser();
-      set({ user, isLoggedIn: true });
-      return user;
-    } catch {
-      set({ user: null, isLoggedIn: false });
-      return null;
-    }
-  },
+    // Email + password sign in
+    login: async (email, password) => {
+        const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+        });
+        if (error) throw error;
+        set({
+            session: data.session,
+            user: data.user,
+            isLoggedIn: !!data.session,
+        });
+        return data;
+    },
+
+    // Email + password sign up; username goes into user_metadata.
+    // If email confirmation is enabled, data.session is null until confirmed.
+    register: async (username, email, password) => {
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: { data: { username } },
+        });
+        if (error) throw error;
+        if (data.session) {
+            set({
+                session: data.session,
+                user: data.user,
+                isLoggedIn: true,
+            });
+        }
+        return data;
+    },
+
+    logout: async () => {
+        await supabase.auth.signOut();
+        set({ session: null, user: null, isLoggedIn: false });
+    },
 }));

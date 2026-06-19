@@ -1,13 +1,13 @@
+import { useEffect } from "react";
 import "./App.css";
-import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
+import { useAuthStore } from "./store/useAuthStore";
 
 function App() {
-  return (
-    <BrowserRouter>
-      <AppRoutes />
-    </BrowserRouter>
-  );
+  // Subscribe to Supabase auth state + hydrate the persisted session once.
+  useEffect(() => useAuthStore.getState().init(), []);
+
+  return <AppRoutes />;
 }
 
 export default App;

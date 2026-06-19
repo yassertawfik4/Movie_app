@@ -2,170 +2,235 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { register as registerUser } from "@/api/authApi";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Link, useNavigate } from "react-router-dom";
+import { Clapperboard } from "lucide-react";
+import { useAuthStore } from "../store/useAuthStore";
+import useToastStore from "../store/useToastStore";
 
-// Validation schema (kept outside the component so it isn't recreated each render)
 const registerSchema = z.object({
-  firstName: z.string().min(1, { message: "First name is required" }),
-  email: z.string().email({ message: "Invalid email address" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
+    username: z.string().min(1, { message: "Username is required." }),
+    email: z.string().email({ message: "Enter a valid email address." }),
+    password: z
+        .string()
+        .min(6, { message: "Password must be at least 6 characters." }),
 });
 
 const Register = () => {
-  const [serverError, setServerError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+    const navigate = useNavigate();
+    const registerUser = useAuthStore((s) => s.register);
+    const showToast = useToastStore((s) => s.show);
+    const [serverError, setServerError] = useState("");
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm({
-    resolver: zodResolver(registerSchema),
-    mode: "onTouched",
-    defaultValues: { firstName: "", email: "", password: "" },
-  });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors, isSubmitting },
+    } = useForm({
+        resolver: zodResolver(registerSchema),
+        mode: "onTouched",
+        defaultValues: { username: "", email: "", password: "" },
+    });
 
-  // Only runs when validation passes
-  const onSubmit = async (data) => {
-    setServerError("");
-    setSuccessMessage("");
-    try {
-      const response = await registerUser(
-        data.firstName,
-        data.email,
-        data.password,
-      );
-      console.log("Register response:", response);
-      // API returns a message: success ("User created successfully") or
-      // error ("User already exists"), both with a 200 status
-      if (response?.message) {
-        if (/success/i.test(response.message)) {
-          setSuccessMessage(response.message);
-        } else {
-          setServerError(response.message);
+    const onSubmit = async (data) => {
+        setServerError("");
+        try {
+            const result = await registerUser(
+                data.username,
+                data.email,
+                data.password,
+            );
+            if (result?.session) {
+                // Email confirmation disabled → signed in immediately.
+                showToast("Account created — welcome!");
+                navigate("/account");
+            } else {
+                // Email confirmation required → no session yet.
+                showToast("Account created — check your email to confirm.");
+                navigate("/login");
+            }
+        } catch (err) {
+            const raw = err?.message || "Registration failed";
+            const msg =
+                err?.code === "over_email_send_rate_limit" ||
+                raw.toLowerCase().includes("rate limit")
+                    ? "Too many sign-up attempts. Please wait a few minutes and try again."
+                    : raw;
+            setServerError(msg);
+            showToast(msg, "error");
         }
-        return;
-      }
-      // TODO: redirect once routing is set up, e.g. navigate("/login")
-    } catch (err) {
-      setServerError(err?.response?.data?.message || "Registration failed");
-    }
-  };
+    };
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-100 p-4">
-      <div className="w-full max-w-sm overflow-hidden rounded-xl bg-white shadow-lg">
-        {/* Brand bar — matches the app's yellow header */}
-        <div className="flex items-center gap-2 bg-[#F5C518] px-6 py-3">
-          <span className="text-base font-bold tracking-tight text-neutral-900">
-            🎬 Movie App
-          </span>
-        </div>
-
-        <div className="px-6 py-8">
-          <h1 className="text-2xl font-bold text-neutral-900">
-            Create account
-          </h1>
-          <p className="mt-1 text-sm text-neutral-500">
-            Sign up to start your watch list.
-          </p>
-
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="mt-6 flex flex-col gap-4"
-          >
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="firstName" className="text-neutral-700">
-                first name
-              </Label>
-              <Input
-                id="firstName"
-                type="text"
-                placeholder="Enter your firstName"
-                aria-invalid={!!errors.firstName}
-                className="focus-visible:ring-0 focus-visible:border-[#F5C518]"
-                {...register("firstName")}
-              />
-              {errors.firstName && (
-                <p className="text-sm text-red-600">
-                  {errors.firstName.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-neutral-700">
-                Email
-              </Label>
-              <Input
-                id="email"
-                type="text"
-                placeholder="Enter your email"
-                aria-invalid={!!errors.email}
-                className="focus-visible:ring-0 focus-visible:border-[#F5C518]"
-                {...register("email")}
-              />
-              {errors.email && (
-                <p className="text-sm text-red-600">
-                  {errors.email.message}
-                </p>
-              )}
-            </div>
-
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password" className="text-neutral-700">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Enter your password"
-                className="focus-visible:ring-0 focus-visible:border-[#F5C518]"
-                aria-invalid={!!errors.password}
-                {...register("password")}
-              />
-              {errors.password && (
-                <p className="text-sm text-red-600">
-                  {errors.password.message}
-                </p>
-              )}
-            </div>
-
-            {serverError && (
-              <p className="text-sm text-red-600">{serverError}</p>
-            )}
-
-            {successMessage && (
-              <p className="text-sm text-green-600">{successMessage}</p>
-            )}
-
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="mt-2 w-full bg-[#F5C518] font-semibold text-neutral-900 hover:bg-[#e0b416] cursor-pointer"
+    return (
+        <section
+            style={{
+                display: "flex",
+                justifyContent: "center",
+                padding: "clamp(10px,4vh,48px) 0",
+            }}
+        >
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: 430,
+                    background: "var(--surface)",
+                    border: "1px solid var(--line)",
+                    borderRadius: 22,
+                    padding: "clamp(26px,4vw,38px)",
+                    boxShadow: "0 24px 60px -24px rgba(0,0,0,.45)",
+                    animation: "mq-popIn .25s ease both",
+                }}
             >
-              {isSubmitting ? "Creating account..." : "Sign up"}
-            </Button>
-          </form>
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 11,
+                        marginBottom: 6,
+                    }}
+                >
+                    <span
+                        style={{
+                            width: 36,
+                            height: 36,
+                            borderRadius: 10,
+                            background: "var(--rose)",
+                            display: "grid",
+                            placeItems: "center",
+                        }}
+                    >
+                        <Clapperboard size={20} color="#fff" strokeWidth={2} />
+                    </span>
+                    <span
+                        style={{
+                            fontWeight: 800,
+                            fontSize: 18,
+                            letterSpacing: ".16em",
+                        }}
+                    >
+                        MARQUEE
+                    </span>
+                </div>
 
-          <p className="mt-6 text-center text-sm text-neutral-500">
-            Already have an account?{" "}
-            <a
-              href="#"
-              className="font-medium text-neutral-900 hover:underline"
-            >
-              Sign in
-            </a>
-          </p>
-        </div>
-      </div>
-    </div>
-  );
+                <h1
+                    style={{
+                        fontSize: 27,
+                        fontWeight: 800,
+                        letterSpacing: "-.02em",
+                        marginTop: 14,
+                    }}
+                >
+                    Create your account
+                </h1>
+                <p className="mq-sub" style={{ marginTop: 5 }}>
+                    Save movies and build your wishlist.
+                </p>
+
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    style={{
+                        marginTop: 26,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16,
+                    }}
+                >
+                    <div>
+                        <label className="mq-label" htmlFor="username">
+                            Username
+                        </label>
+                        <input
+                            id="username"
+                            type="text"
+                            placeholder="your_handle"
+                            className={`mq-input ${
+                                errors.username ? "is-error" : ""
+                            }`}
+                            {...register("username")}
+                        />
+                        {errors.username && (
+                            <div className="mq-field-err">
+                                {errors.username.message}
+                            </div>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mq-label" htmlFor="email">
+                            Email
+                        </label>
+                        <input
+                            id="email"
+                            type="text"
+                            placeholder="you@example.com"
+                            className={`mq-input ${errors.email ? "is-error" : ""}`}
+                            {...register("email")}
+                        />
+                        {errors.email && (
+                            <div className="mq-field-err">
+                                {errors.email.message}
+                            </div>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="mq-label" htmlFor="password">
+                            Password
+                        </label>
+                        <input
+                            id="password"
+                            type="password"
+                            placeholder="••••••••"
+                            className={`mq-input ${
+                                errors.password ? "is-error" : ""
+                            }`}
+                            {...register("password")}
+                        />
+                        {errors.password && (
+                            <div className="mq-field-err">
+                                {errors.password.message}
+                            </div>
+                        )}
+                    </div>
+
+                    {serverError && (
+                        <div className="mq-field-err">{serverError}</div>
+                    )}
+
+                    <button
+                        type="submit"
+                        className="mq-btn"
+                        disabled={isSubmitting}
+                        style={{
+                            height: 50,
+                            borderRadius: 13,
+                            fontSize: 15.5,
+                            fontWeight: 700,
+                            marginTop: 4,
+                        }}
+                    >
+                        {isSubmitting ? "Creating account…" : "Create account"}
+                    </button>
+                </form>
+
+                <p
+                    className="mq-sub"
+                    style={{ textAlign: "center", marginTop: 22 }}
+                >
+                    Already have an account?{" "}
+                    <Link
+                        to="/login"
+                        style={{
+                            color: "var(--rose)",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                        }}
+                    >
+                        Sign in
+                    </Link>
+                </p>
+            </div>
+        </section>
+    );
 };
 
 export default Register;
