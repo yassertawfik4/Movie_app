@@ -2,3 +2,670 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
+
+:root {
+  --bg: #0b0b0d;
+  --surface: #151517;
+  --surface-2: #1d1d21;
+  --surface-3: #26262b;
+  --text: #fafafa;
+  --text-2: #b4b4bd;
+  --text-3: #7c7c87;
+  --line: #2a2a31;
+  --btn: #fafafa;
+  --btn-text: #0b0b0d;
+  --star: #f5b21a;
+  --rose: #f43f5e;
+}
+
+:root[data-theme="light"] {
+  --bg: #fbfbfc;
+  --surface: #ffffff;
+  --surface-2: #f5f5f6;
+  --surface-3: #ededf0;
+  --text: #0c0c0e;
+  --text-2: #52525b;
+  --text-3: #8a8a93;
+  --line: #e6e6ea;
+  --btn: #0c0c0e;
+  --btn-text: #ffffff;
+  --star: #e0a008;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Schibsted Grotesk", system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  transition: background 0.35s ease, color 0.35s ease;
+}
+
+input {
+  font-family: inherit;
+}
+
+::selection {
+  background: rgba(244, 63, 94, 0.25);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 8px;
+}
+
+@keyframes mq-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+@keyframes mq-toastIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -14px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+@keyframes mq-fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes mq-overlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes mq-popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes mq-pulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.35);
+  }
+  70% {
+    box-shadow: 0 0 0 18px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.mq-fade-up {
+  animation: mq-fadeUp 0.45s ease both;
+}
+
+/* ---------- shell / layout ---------- */
+.mq-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+}
+.mq-main {
+  flex: 1;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px) 64px;
+}
+
+/* ---------- typography ---------- */
+.mq-serif {
+  font-family: "Instrument Serif", serif;
+}
+.mq-h2 {
+  font-size: clamp(22px, 3vw, 28px);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.mq-sub {
+  color: var(--text-3);
+  font-size: 14.5px;
+}
+
+/* ---------- buttons ---------- */
+.mq-btn,
+.mq-btn-rose,
+.mq-btn-outline,
+.mq-btn-glass {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: transform 0.16s ease, opacity 0.16s ease, background 0.16s ease,
+    border-color 0.16s ease;
+}
+.mq-btn {
+  background: var(--btn);
+  color: var(--btn-text);
+}
+.mq-btn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+.mq-btn-rose {
+  background: var(--rose);
+  color: #fff;
+}
+.mq-btn-rose:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+.mq-btn-outline {
+  background: var(--surface);
+  border-color: var(--line);
+  color: var(--text);
+}
+.mq-btn-outline:hover {
+  background: var(--surface-2);
+  border-color: var(--text-3);
+}
+.mq-btn-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+  backdrop-filter: blur(6px);
+}
+.mq-btn-glass:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.mq-icon-btn {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-2);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.mq-icon-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--text-3);
+  color: var(--text);
+}
+.mq-icon-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- navbar ---------- */
+.mq-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  background: color-mix(in srgb, var(--bg) 78%, transparent);
+  border-bottom: 1px solid var(--line);
+}
+.mq-nav-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 clamp(16px, 4vw, 40px);
+  height: 66px;
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 2vw, 22px);
+}
+.mq-brand-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--rose);
+  display: grid;
+  place-items: center;
+  flex: 0 0 34px;
+  box-shadow: 0 6px 16px -6px var(--rose);
+}
+.mq-navlink {
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 11px;
+  border: none;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14.5px;
+  cursor: pointer;
+  transition: background 0.16s ease, color 0.16s ease;
+}
+.mq-navlink:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.mq-navlink.is-active {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.mq-badge {
+  min-width: 19px;
+  height: 19px;
+  padding: 0 5px;
+  border-radius: 9px;
+  background: var(--rose);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 7px;
+}
+.mq-search {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 42px;
+  padding: 0 14px;
+  border-radius: 13px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  width: 100%;
+  max-width: 320px;
+  min-width: 0;
+}
+.mq-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--text);
+  font-size: 14.5px;
+  flex: 1;
+  min-width: 0;
+}
+.mq-avatar {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: none;
+  background: var(--rose);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: transform 0.16s ease, opacity 0.16s ease;
+}
+.mq-avatar:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ---------- chips ---------- */
+.mq-chip {
+  flex: 0 0 auto;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-2);
+  font: inherit;
+  font-weight: 600;
+  font-size: 13.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.16s ease, background 0.16s ease, color 0.16s ease;
+}
+.mq-chip:hover {
+  border-color: var(--text-3);
+}
+.mq-chip.is-active {
+  border-color: var(--btn);
+  background: var(--btn);
+  color: var(--btn-text);
+}
+.mq-chip-row {
+  display: flex;
+  gap: 9px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  scrollbar-width: thin;
+}
+
+/* ---------- sort dropdown ---------- */
+.mq-sort-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  height: 42px;
+  padding: 0 15px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.mq-sort-btn:hover {
+  background: var(--surface-2);
+  border-color: var(--text-3);
+}
+.mq-menu {
+  position: absolute;
+  right: 0;
+  top: 48px;
+  z-index: 20;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 6px;
+  min-width: 190px;
+  box-shadow: 0 20px 48px -12px rgba(0, 0, 0, 0.4);
+  animation: mq-popIn 0.14s ease both;
+}
+.mq-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-weight: 500;
+  font-size: 14px;
+  cursor: pointer;
+}
+.mq-menu-item:hover {
+  background: var(--surface-2);
+}
+.mq-menu-item.is-active {
+  background: var(--surface-2);
+  font-weight: 700;
+}
+
+/* ---------- movie grid + card ---------- */
+.mq-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
+  gap: clamp(14px, 2vw, 24px);
+}
+.mq-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  animation: mq-fadeUp 0.4s ease both;
+  text-align: left;
+}
+.mq-card:hover {
+  transform: translateY(-5px);
+}
+.mq-poster {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 15px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background-size: cover;
+  background-position: center;
+}
+.mq-poster-mono {
+  position: absolute;
+  left: 50%;
+  top: 46%;
+  transform: translate(-50%, -50%);
+  font-family: "Instrument Serif", serif;
+  font-size: 104px;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.16);
+  user-select: none;
+}
+.mq-poster-overlay {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+      110% 80% at 30% 12%,
+      rgba(255, 255, 255, 0.16),
+      transparent 55%
+    ),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.35), transparent 45%);
+}
+.mq-heart-btn {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(10, 10, 12, 0.42);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.16s ease;
+}
+.mq-heart-btn:hover {
+  background: rgba(10, 10, 12, 0.62);
+}
+.mq-rating {
+  position: absolute;
+  bottom: 9px;
+  left: 9px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: rgba(10, 10, 12, 0.55);
+  backdrop-filter: blur(6px);
+  padding: 4px 8px;
+  border-radius: 8px;
+}
+.mq-card-title {
+  margin-top: 11px;
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+.mq-card-sub {
+  margin-top: 3px;
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+/* ---------- skeleton ---------- */
+.mq-sk-poster {
+  aspect-ratio: 2/3;
+  border-radius: 15px;
+  background: linear-gradient(
+    100deg,
+    var(--surface) 30%,
+    var(--surface-2) 50%,
+    var(--surface) 70%
+  );
+  background-size: 800px 100%;
+  animation: mq-shimmer 1.3s infinite linear;
+}
+.mq-sk-line {
+  height: 13px;
+  border-radius: 6px;
+  background: var(--surface-2);
+}
+
+/* ---------- pagination ---------- */
+.mq-page-btn {
+  min-width: 42px;
+  height: 42px;
+  padding: 0 6px;
+  border-radius: 11px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  transition: background 0.16s ease, border-color 0.16s ease;
+}
+.mq-page-btn:hover:not(:disabled) {
+  background: var(--surface-2);
+  border-color: var(--text-3);
+}
+.mq-page-btn.is-active {
+  background: var(--btn);
+  color: var(--btn-text);
+  border-color: var(--btn);
+  font-weight: 700;
+}
+.mq-page-btn:disabled {
+  color: var(--text-3);
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- inputs (auth) ---------- */
+.mq-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  margin-bottom: 7px;
+}
+.mq-input {
+  width: 100%;
+  height: 48px;
+  padding: 0 15px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.16s ease;
+}
+.mq-input:focus {
+  border-color: var(--text-3);
+}
+.mq-input.is-error {
+  border-color: var(--rose);
+}
+.mq-field-err {
+  color: var(--rose);
+  font-size: 12.5px;
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* ---------- toast ---------- */
+.mq-toast {
+  position: fixed;
+  top: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 13px 18px;
+  box-shadow: 0 18px 44px -12px rgba(0, 0, 0, 0.45);
+  animation: mq-toastIn 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  max-width: 90vw;
+}
+.mq-toast-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 24px;
+}
+
+/* ---------- modal ---------- */
+.mq-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: rgba(6, 6, 8, 0.78);
+  backdrop-filter: blur(8px);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  animation: mq-overlayIn 0.2s ease both;
+}
+.mq-modal {
+  width: 100%;
+  max-width: 860px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  animation: mq-popIn 0.26s ease both;
+  background: #000;
+}
+
+/* ---------- footer ---------- */
+.mq-footer {
+  border-top: 1px solid var(--line);
+  margin-top: auto;
+}
+.mq-footer-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 34px clamp(16px, 4vw, 40px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
