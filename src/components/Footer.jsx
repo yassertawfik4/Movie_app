@@ -41,18 +41,6 @@ const Footer = () => {
                 <p style={{ color: "var(--text-3)", fontSize: 13.5 }}>
                     Movie data from TMDB · Built with React
                 </p>
-
-                <Link
-                    to="/this-page-does-not-exist"
-                    style={{
-                        color: "var(--text-3)",
-                        fontSize: 13,
-                        textDecoration: "underline",
-                        textUnderlineOffset: 3,
-                    }}
-                >
-                    View 404 page
-                </Link>
             </div>
         </footer>
     );
