@@ -1,15 +1,10 @@
 import useWishlistStore from "../store/useWishlistStore";
 import useToastStore from "../store/useToastStore";
+import { useAuthStore } from "../store/useAuthStore";
 
-/**
- * Wishlist helper bound to a single movie.
- *
- * Subscribes to the *derived boolean* (`is this movie saved?`) rather than to
- * a stable store function — so the component re-renders exactly when this
- * movie's saved state flips, and never for unrelated wishlist changes.
- */
 export const useWishlist = (movie) => {
     const id = movie?.id;
+    const isLoggedIn = useAuthStore((s) => s.isLoggedIn);
     const inWishlist = useWishlistStore((s) =>
         s.wishlist.some((m) => m.id === id),
     );
@@ -18,6 +13,10 @@ export const useWishlist = (movie) => {
 
     const toggleWishlist = () => {
         if (!movie) return;
+        if (!isLoggedIn) {
+            showToast("Sign in to save movies to your wishlist", "error");
+            return;
+        }
         toggle(movie);
         showToast(inWishlist ? "Removed from wishlist" : "Added to wishlist");
     };
